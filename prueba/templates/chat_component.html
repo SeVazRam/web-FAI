@@ -1,0 +1,940 @@
+<!-- templates/chat_component.html -->
+<!-- Componente de Chatbot Asistente Virtual -->
+
+<div class="chatbot-container" id="chatbotContainer">
+    <!-- Header del Chatbot -->
+    <div class="chatbot-header" onclick="toggleChat()">
+        <div class="chatbot-header-left">
+            <span class="chatbot-icon">🤖</span>
+            <span class="chatbot-title">Virtual Assistant</span>
+        </div>
+        <div class="chatbot-header-right">
+            <span class="chatbot-status">● On line</span>
+            <span class="chatbot-toggle">▼</span>
+        </div>
+    </div>
+    
+    <!-- Ventana de Mensajes -->
+    <div class="chatbot-messages" id="chatMessages">
+        <!-- Mensaje de bienvenida -->
+        <div class="message bot-message welcome-message">
+            <div class="message-content">
+                <strong>Hello! I'm your virtual assistant</strong>
+                <p>I'm here to help you with:</p>
+                <ul class="welcome-list">
+                    <li>📱 Plan information</li>
+                    <li>💰 Prices and promotions</li>
+                    <li>🔄 Plan changes</li>
+                    <li>❓ Frequently asked questions</li>
+                    <li>📞 Contact and support</li>
+                </ul>
+                <p class="welcome-footer">How can I help you today?</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Área de entrada de texto -->
+    <div class="chatbot-input-area">
+        <div class="chatbot-input-wrapper">
+            <input type="text" 
+                   id="chatInput" 
+                   class="chatbot-input" 
+                   placeholder="Escribe tu mensaje..." 
+                   autocomplete="off"
+                   onkeypress="handleKeyPress(event)">
+            <button class="chatbot-send-btn" onclick="sendMessage()">
+                <span class="send-icon">➤</span>
+            </button>
+        </div>
+        
+        <!-- Indicador de escritura -->
+        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <!-- Botones de acción rápida -->
+        <div class="quick-actions-chat">
+            <button class="quick-action-btn" onclick="quickAction('planes')">📱 Plans</button>
+            <button class="quick-action-btn" onclick="quickAction('precios')">💰 Prices</button>
+            <button class="quick-action-btn" onclick="quickAction('cambiar')">🔄 Change plan</button>
+            <button class="quick-action-btn" onclick="quickAction('contacto')">📞 Contact</button>
+        </div>
+    </div>
+</div>
+
+<!-- Botón flotante para móviles (se muestra cuando el chat está cerrado) -->
+<div class="chatbot-floating-btn" id="chatbotFloatingBtn" onclick="toggleChat()" style="display: none;">
+    <span class="floating-icon">💬</span>
+    <span class="floating-text">Ayuda</span>
+</div>
+
+<style>
+/* Variables de colores */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --dark-color: #2c3e50;
+    --light-bg: #f8fafc;
+    --border-color: #e0e0e0;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --shadow: 0 5px 25px rgba(0,0,0,0.15);
+    --shadow-hover: 0 8px 30px rgba(102, 126, 234, 0.3);
+}
+
+/* Contenedor principal del chatbot */
+.chatbot-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 350px;
+    border-radius: 15px;
+    background: white;
+    box-shadow: var(--shadow);
+    z-index: 10000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+/* Header del chatbot */
+.chatbot-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s;
+    user-select: none;
+}
+
+.chatbot-header:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.chatbot-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chatbot-icon {
+    font-size: 1.3rem;
+}
+
+.chatbot-title {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.chatbot-header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chatbot-status {
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.chatbot-status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #2ecc71;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+.chatbot-toggle {
+    font-size: 0.9rem;
+    transition: transform 0.3s;
+}
+
+/* Área de mensajes */
+.chatbot-messages {
+    height: 380px;
+    overflow-y: auto;
+    padding: 20px;
+    background: var(--light-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+}
+
+/* Estilos de mensajes */
+.message {
+    max-width: 85%;
+    animation: slideIn 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-content {
+    padding: 12px 16px;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    line-height: 1.5;
+}
+
+.bot-message {
+    align-self: flex-start;
+}
+
+.bot-message .message-content {
+    background: white;
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.user-message {
+    align-self: flex-end;
+}
+
+.user-message .message-content {
+    background: var(--primary-gradient);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.welcome-message {
+    max-width: 100%;
+}
+
+.welcome-message .message-content {
+    background: white;
+    border-left: 4px solid var(--primary-color);
+}
+
+.welcome-list {
+    margin: 10px 0 10px 20px;
+    color: var(--text-secondary);
+}
+
+.welcome-list li {
+    margin: 5px 0;
+}
+
+.welcome-footer {
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+/* Área de entrada */
+.chatbot-input-area {
+    padding: 15px;
+    background: white;
+    border-top: 1px solid var(--border-color);
+}
+
+.chatbot-input-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.chatbot-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    outline: none;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background: white;
+}
+
+.chatbot-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.chatbot-send-btn {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+.chatbot-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+}
+
+.send-icon {
+    font-size: 1.2rem;
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+}
+
+.chatbot-send-btn:hover .send-icon {
+    transform: rotate(90deg);
+}
+
+/* Indicador de escritura */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 20px;
+    width: fit-content;
+    margin: 5px 0;
+    border: 1px solid var(--border-color);
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+    opacity: 0.6;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+    30% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+}
+
+/* Acciones rápidas */
+.quick-actions-chat {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.quick-action-btn {
+    padding: 6px 12px;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.quick-action-btn:hover {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+}
+
+/* Botón flotante (cuando el chat está minimizado) */
+.chatbot-floating-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    z-index: 9999;
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(102, 126, 234, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+    }
+}
+
+.chatbot-floating-btn:hover {
+    transform: scale(1.1);
+}
+
+.floating-icon {
+    font-size: 1.5rem;
+}
+
+.floating-text {
+    font-size: 0.6rem;
+    font-weight: 600;
+}
+
+/* Estados del chatbot */
+.chatbot-container.minimized {
+    transform: translateY(calc(100% - 70px));
+}
+
+.chatbot-container.minimized .chatbot-messages,
+.chatbot-container.minimized .chatbot-input-area,
+.chatbot-container.minimized .quick-actions-chat {
+    display: none;
+}
+
+/* Scroll personalizado */
+.chatbot-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+/* Responsive para móviles */
+@media (max-width: 480px) {
+    .chatbot-container {
+        width: calc(100% - 30px);
+        bottom: 15px;
+        right: 15px;
+        max-width: 350px;
+    }
+    
+    .chatbot-container.minimized {
+        transform: translateY(calc(100% - 60px));
+    }
+    
+    .chatbot-messages {
+        height: 300px;
+    }
+    
+    .chatbot-header {
+        padding: 12px 16px;
+    }
+    
+    .chatbot-status {
+        display: none;
+    }
+    
+    .quick-actions-chat {
+        flex-wrap: wrap;
+    }
+    
+    .quick-action-btn {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+}
+
+/* Notificaciones */
+.message-notification {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Enlaces en mensajes */
+.message a {
+    color: inherit;
+    text-decoration: underline;
+    opacity: 0.9;
+}
+
+.message a:hover {
+    opacity: 1;
+}
+
+/* Mensajes de error */
+.error-message .message-content {
+    background: #fee;
+    color: var(--danger-color);
+    border-left: 4px solid var(--danger-color);
+}
+
+/* Mensajes de éxito */
+.success-message .message-content {
+    background: #edf7ed;
+    color: var(--success-color);
+    border-left: 4px solid var(--success-color);
+}
+</style>
+
+<script>
+// Estado del chatbot
+let isChatOpen = true;
+let messageCount = 0;
+let conversationHistory = [];
+
+// Base de conocimiento del chatbot
+const knowledgeBase = {
+    saludos: {
+        patrones: ['hello', 'good', 'good morning', 'good afternoon', 'hey', 'hi'],
+        respuestas: [
+            "Hi! 👋 How are you?",
+            "Hello! How can I help you?",
+            "Hi! Nice to see you here."
+        ]
+    },
+    planes: {
+        patrones: ['plan', 'plans', 'what plans', 'types of plan', 'options'],
+        respuestas: [
+            "📱 We have 4 amazing plans:\n\n" +
+            "🔹 **Basic** - $29.99/month\n" +
+            " • 300 minutes\n" +
+            " • 5GB data\n" +
+            " • Unlimited SMS\n\n" +
+            "🔹 **Standard** - $49.99/month\n" +
+            " • 800 minutes\n" +
+            " • 15GB data\n" +
+            " • Unlimited SMS\n\n" +
+            "🔹 **Premium** - $79.99/month\n" +
+            " • Unlimited minutes\n" +
+            " • 40GB data\n" +
+            " • Unlimited SMS\n\n" +
+            "🔹 **Family** - $129.99/month\n" +
+            " • Unlimited minutes\n" +
+            " • 80GB data\n" +
+            " • Unlimited SMS\n" +
+            "• ​​Share with 4 lines\n\n" +
+            "Would you like to know more details about a specific plan?"
+        ]
+    },
+    precios: {
+        patrones: ['price', 'cost', 'how much', 'value', 'it costs', 'rate'],
+        respuestas: [
+        "💰 **Our Plan Prices:**\n\n" +
+        "• ​​Basic: $29.99/month\n" +
+        "• ​​Standard: $49.99/month\n" +
+        "• ​​Premium: $79.99/month\n" +
+        "• ​​Family: $129.99/month\n\n" +
+        "All plans include:\n" +
+        "✅ No activation fee\n" +
+        "✅ 24/7 support\n" +
+        "✅ Management app included\n\n" +
+        "Want to learn more about a plan?
+        ]
+    },
+    cambiar_plan: {
+        patrones: ['change', 'switch', 'migrate', 'update', 'improve'],
+        respuestas: [
+            "🔄 **Changing your plan is very easy:**\n\n" +
+            "1️⃣ Go to the 'Available Plans' section in your dashboard\n" +
+            "2️⃣ Select the plan you're interested in\n" +
+            "3️⃣ Click on 'Switch to this plan'\n" +
+            "4️⃣ Confirm your selection\n\n" +
+            "✨ Changes are **immediate** and you'll see your new plan reflected instantly.\n\n" +
+            "Which plan would you like to switch to?"
+        ]
+    },
+    contacto: {
+        patrones: ['contact', 'support', 'human help', 'talk to', 'phone', 'email'],
+        respuestas: [
+            "📞 **Contact channels:**\n\n" +
+            "📧 Email: support@telefonia.com\n" +
+            "📱 WhatsApp: +123 456 7890\n" +
+            "📞 Phone: (123) 456-7890\n" +
+            "🕒 Hours: Mon-Fri 9:00 AM - 6:00 PM\n\n" +
+            "💬 You can also leave your question and we'll contact you within 24h."
+        ]
+    },
+    datos: {
+        patrones: ['data', 'internet', 'gb', 'megabytes', 'browse'],
+        respuestas: [
+            "📶 **Data packages included:**\n\n" +
+            "• Basic: 5GB\n" +
+            "• Standard: 15GB\n" +
+            "• Premium: 40GB\n" +
+            "• Family: 80GB (shared)\n\n" +
+            "All include unlimited browsing on social media and WhatsApp without consuming data."
+        ]
+    },
+    minutos: {
+        patrones: ['minutes', 'calls', 'talk'],
+        respuestas: [
+            "📞 **Minutes included per plan:**\n\n" +
+            "• Basic: 300 minutes\n" +
+            "• Standard: 800 minutes\n" +
+            "• Premium: Unlimited\n" +
+            "• Family: Unlimited\n\n" +
+            "✅ Calls to all local carriers included."
+        ]
+    },
+    cobertura: {
+        patrones: ['coverage', 'signal', 'zone', 'area'],
+        respuestas: [
+            "📡 We have coverage throughout the country:\n\n" +
+            "✅ 95% 4G/LTE coverage\n" +
+            "✅ 5G coming soon\n" +
+            "✅ National roaming included\n" +
+            "✅ Rural areas with guaranteed coverage\n\n" +
+            "Would you like to check coverage in your area?"
+        ]
+    },
+    facturacion: {
+        patrones: ['bill', 'payment', 'charge', 'monthly fee', 'receipt'],
+        respuestas: [
+            "💰 **Billing information:**\n\n" +
+            "• Monthly billing\n" +
+            "• Payment by credit card/debit/cash\n" +
+            "• Digital invoice available\n" +
+            "• Discount for automatic payment\n\n" +
+            "Do you need help with a specific payment?
+        ]
+    },
+    promociones: {
+        patrones: ['promotion', 'discount', 'offer', 'special'],
+        respuestas: [
+            "🎉 **Current promotions:**\n\n" +
+            "🔥 3 months with 20% discount on Premium Plan\n" +
+            "👥 Bring a friend and both get 1 month free\n" +
+            "🎂 On your birthday, we double your GB\n\n" +
+            "Would you like to take advantage of any promotion?"
+        ]
+    },
+    gracias: {
+        patrones: ['gracias', 'thanks', 'thank'],
+        respuestas: [
+             "You're welcome! 😊 I'm here to help you.",
+            "My pleasure! Is there anything else you need?",
+            "That's what I'm here for! Come back whenever you want."
+        ]
+    },
+    despedida: {
+        patrones: ['goodbye', 'bye', 'see you later', 'see you'],
+        respuestas: [
+            "See you later! Have a great day 🌟",
+            "See you soon! 😊",
+            "Bye! I'm here if you need anything."
+        ]
+    },
+    no_entendido: {
+        respuestas: [
+            "I'm sorry, I didn't fully understand. Could you rephrase that?",
+            "I'm not sure I understand. Can you be more specific?",
+            "Sorry, I don't have that information. Would you like to ask about plans, prices, or contact us?"
+        ]
+    }
+};
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🤖 Chatbot asistente cargado correctamente');
+    
+    // Verificar si el usuario está logueado
+    {% if session.get('username') %}
+    setTimeout(() => {
+        const mensajePersonalizado = `¡Hola de nuevo, {{ session['username'] }}! 👋 ¿En qué puedo ayudarte con tu plan ${getUserPlan()}?`;
+        addMessage(mensajePersonalizado, 'bot');
+    }, 1500);
+    {% endif %}
+});
+
+// Obtener plan del usuario (función auxiliar)
+function getUserPlan() {
+    {% if session.get('rol') == 'cliente' and session.get('username') %}
+        {% set usuario = usuarios.get(session['username'], {}) %}
+        return "{{ usuario.get('plan', 'actual') }}";
+    {% else %}
+        return "";
+    {% endif %}
+}
+
+// Alternar chat minimizado/maximizado
+function toggleChat() {
+    const container = document.getElementById('chatbotContainer');
+    const floatingBtn = document.getElementById('chatbotFloatingBtn');
+    const toggle = document.querySelector('.chatbot-toggle');
+    
+    isChatOpen = !isChatOpen;
+    
+    if (isChatOpen) {
+        container.classList.remove('minimized');
+        floatingBtn.style.display = 'none';
+        toggle.textContent = '▼';
+        toggle.style.transform = 'rotate(0deg)';
+        
+        // Enfocar el input
+        document.getElementById('chatInput').focus();
+    } else {
+        container.classList.add('minimized');
+        floatingBtn.style.display = 'flex';
+        toggle.textContent = '▲';
+        toggle.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Manejar tecla Enter
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+// Acciones rápidas
+function quickAction(action) {
+    const input = document.getElementById('chatInput');
+    let mensaje = '';
+    
+    switch(action) {
+        case 'planes':
+            mensaje = 'Quiero información sobre los planes';
+            break;
+        case 'precios':
+            mensaje = 'Cuánto cuestan los planes';
+            break;
+        case 'cambiar':
+            mensaje = 'Cómo puedo cambiar mi plan';
+            break;
+        case 'contacto':
+            mensaje = 'Necesito contactar con soporte';
+            break;
+    }
+    
+    input.value = mensaje;
+    sendMessage();
+}
+
+// Enviar mensaje
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (message === '') return;
+    
+    // Guardar en historial
+    conversationHistory.push({ role: 'user', content: message });
+    
+    // Mostrar mensaje del usuario
+    addMessage(message, 'user');
+    input.value = '';
+    
+    // Mostrar indicador de escritura
+    showTypingIndicator(true);
+    
+    // Simular procesamiento
+    setTimeout(() => {
+        showTypingIndicator(false);
+        
+        // Generar respuesta
+        const respuesta = generarRespuesta(message);
+        
+        // Guardar respuesta en historial
+        conversationHistory.push({ role: 'bot', content: respuesta });
+        
+        // Mostrar respuesta
+        addMessage(respuesta, 'bot');
+        
+        // Actualizar contador de mensajes
+        messageCount++;
+        
+        // Si es la primera interacción, sugerir acciones
+        if (messageCount === 1) {
+            setTimeout(() => {
+                addMessage("¿Te gustaría que te muestre los planes disponibles o tienes alguna duda específica?", 'bot');
+            }, 800);
+        }
+    }, 1000 + Math.random() * 1000);
+}
+
+// Generar respuesta inteligente
+function generarRespuesta(mensaje) {
+    mensaje = mensaje.toLowerCase();
+    
+    // Buscar coincidencias en la base de conocimiento
+    for (let categoria in knowledgeBase) {
+        if (categoria === 'no_entendido') continue;
+        
+        const item = knowledgeBase[categoria];
+        if (item.patrones) {
+            for (let patron of item.patrones) {
+                if (mensaje.includes(patron)) {
+                    // Seleccionar respuesta aleatoria si hay múltiples
+                    const respuestas = item.respuestas;
+                    return respuestas[Math.floor(Math.random() * respuestas.length)];
+                }
+            }
+        }
+    }
+    
+    // Respuesta por defecto
+    const noEntendido = knowledgeBase.no_entendido.respuestas;
+    return noEntendido[Math.floor(Math.random() * noEntendido.length)];
+}
+
+// Mostrar/ocultar indicador de escritura
+function showTypingIndicator(show) {
+    const indicator = document.getElementById('typingIndicator');
+    indicator.style.display = show ? 'flex' : 'none';
+    
+    if (show) {
+        // Hacer scroll al indicador
+        setTimeout(() => {
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }, 100);
+    }
+}
+
+// Agregar mensaje al chat
+function addMessage(text, sender) {
+    const messagesDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    // Procesar formato del texto
+    let formattedText = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+    
+    messageDiv.innerHTML = `<div class="message-content">${formattedText}</div>`;
+    
+    messagesDiv.appendChild(messageDiv);
+    
+    // Hacer scroll al último mensaje
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// Mostrar notificación de nuevo mensaje (cuando el chat está minimizado)
+function showNotification() {
+    const floatingBtn = document.getElementById('chatbotFloatingBtn');
+    if (!isChatOpen) {
+        const notification = document.createElement('span');
+        notification.className = 'message-notification';
+        notification.textContent = '1';
+        floatingBtn.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Exportar conversación (útil para admin)
+function exportConversation() {
+    const conversation = conversationHistory.map(msg => {
+        return `[${msg.role === 'user' ? '👤' : '🤖'}] ${msg.content}`;
+    }).join('\n');
+    
+    const blob = new Blob([conversation], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+}
+
+// Comandos especiales (para admin)
+function handleSpecialCommands(command) {
+    if (command === '/clear') {
+        document.getElementById('chatMessages').innerHTML = '';
+        conversationHistory = [];
+        addMessage('🧹 Conversación reiniciada', 'bot');
+        return true;
+    }
+    return false;
+}
+
+// Escuchar eventos de red
+window.addEventListener('online', function() {
+    addMessage('🔌 Conexión restablecida. ¿En qué puedo ayudarte?', 'bot');
+});
+
+window.addEventListener('offline', function() {
+    addMessage('📡 Sin conexión. Algunas funciones pueden no estar disponibles.', 'bot');
+});
+
+// Debug mode (solo para desarrollo)
+const DEBUG_MODE = false;
+if (DEBUG_MODE) {
+    console.log('🤖 Chatbot en modo debug');
+    window.chatbot = {
+        toggle: toggleChat,
+        send: sendMessage,
+        clear: () => { document.getElementById('chatMessages').innerHTML = ''; },
+        history: conversationHistory
+    };
+}
+</script>

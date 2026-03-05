@@ -1,0 +1,1168 @@
+<!-- templates/admin_editar_usuario.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if usuario %}Editar{% else %}Nuevo{% endif %} Usuario - Telecom Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* ========== CONTAINER PRINCIPAL ========== */
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* ========== BREADCRUMB ========== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .breadcrumb i {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+
+        /* ========== CARD PRINCIPAL ========== */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== CARD HEADER ========== */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .header-title h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .header-title p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        /* ========== FORM ========== */
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .required {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-left: 3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control:hover {
+            border-color: #b0b0b0;
+        }
+
+        .form-control:disabled, .form-control[readonly] {
+            background: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 15px;
+        }
+
+        /* ========== HELP TEXT ========== */
+        .help-text {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .help-text i {
+            font-size: 1rem;
+        }
+
+        .help-text.warning {
+            color: #e67e22;
+        }
+
+        .help-text.success {
+            color: #27ae60;
+        }
+
+        /* ========== PASSWORD STRENGTH ========== */
+        .password-strength {
+            margin-top: 0.5rem;
+        }
+
+        .strength-bar {
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 0.3rem;
+        }
+
+        .strength-progress {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        .strength-text {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        /* ========== TOGGLE SWITCH ========== */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #27ae60;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            margin-left: 70px;
+            display: block;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        /* ========== FORM ACTIONS ========== */
+        .form-actions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* ========== FLASH MESSAGES ========== */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ========== USER PREVIEW ========== */
+        .user-preview {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .preview-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .preview-info h3 {
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+        }
+
+        .preview-info p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        /* ========== VALIDATION STYLES ========== */
+        .form-control.error {
+            border-color: #e74c3c;
+        }
+
+        .form-control.error:focus {
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ========== LOADING SPINNER ========== */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .user-preview {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title h2 {
+                font-size: 1.3rem;
+            }
+            
+            .header-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .preview-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span style="font-size: 1.5rem;">📊</span>
+            <h1>Telecom Admin</h1>
+        </div>
+        
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="{{ url_for('admin_usuarios') }}" class="active">
+                <span>👥</span> Usuarios
+            </a>
+            <a href="{{ url_for('admin_planes') }}">
+                <span>📱</span> Planes
+            </a>
+            <a href="{{ url_for('admin_exportar') }}">
+                <span>📤</span> Exportar
+            </a>
+        </div>
+        
+        <div class="user-menu">
+            <span>👋 Hola, {{ session['username'] }}</span>
+            <div class="user-avatar" onclick="window.location.href='{{ url_for('logout') }}'" title="Cerrar sesión">
+                🚪
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+            <span>›</span>
+            <a href="{{ url_for('admin_usuarios') }}">Usuarios</a>
+            <span>›</span>
+            <span>{% if usuario %}Editar {{ usuario.username }}{% else %}Nuevo Usuario{% endif %}</span>
+        </div>
+
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        <span>
+                            {% if category == 'success' %}✅
+                            {% elif category == 'error' %}❌
+                            {% else %}ℹ️{% endif %}
+                        </span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Card Principal -->
+        <div class="card">
+            <div class="card-header">
+                <div class="header-icon">
+                    {% if usuario %}✏️{% else %}➕{% endif %}
+                </div>
+                <div class="header-title">
+                    <h2>{% if usuario %}Editar Usuario{% else %}Nuevo Usuario{% endif %}</h2>
+                    <p>
+                        {% if usuario %}
+                            Modifica los datos del usuario {{ usuario.username }}
+                        {% else %}
+                            Completa el formulario para crear un nuevo usuario
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Preview del Usuario (solo si es edición) -->
+            {% if usuario %}
+            <div class="user-preview">
+                <div class="preview-avatar">
+                    {{ usuario.nombre[:2]|upper if usuario.nombre else usuario.username[:2]|upper }}
+                </div>
+                <div class="preview-info">
+                    <h3>{{ usuario.nombre }}</h3>
+                    <p>@{{ usuario.username }} • {{ usuario.email }}</p>
+                    <p style="margin-top: 5px;">
+                        {% if usuario.rol == 'admin' %}
+                            <span style="background: #e74c3c; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem;">Administrador</span>
+                        {% else %}
+                            <span style="background: #3498db; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem;">Cliente</span>
+                        {% endif %}
+                        {% if usuario.plan %}
+                            <span style="background: #27ae60; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin-left: 5px;">{{ usuario.plan }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Formulario -->
+            <form class="form" method="POST" onsubmit="return validateForm()">
+                <div class="form-grid">
+                    <!-- Nombre de Usuario -->
+                    <div class="form-group">
+                        <label>
+                            <span>👤</span> Nombre de Usuario
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">@</span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="username" 
+                                   value="{{ usuario.username if usuario else '' }}" 
+                                   {% if usuario %}readonly{% endif %}
+                                   placeholder="ej: juan.perez"
+                                   required
+                                   onkeyup="validateUsername(this)"
+                                   autocomplete="off">
+                        </div>
+                        <div class="help-text">
+                            <span>ℹ️</span> 
+                            {% if usuario %}
+                                El nombre de usuario no se puede cambiar
+                            {% else %}
+                                Debe ser único en el sistema, sin espacios
+                            {% endif %}
+                        </div>
+                        <div id="usernameError" class="error-message"></div>
+                    </div>
+
+                    <!-- Nombre Completo -->
+                    <div class="form-group">
+                        <label>
+                            <span>📝</span> Nombre Completo
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">👤</span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nombre" 
+                                   name="nombre" 
+                                   value="{{ usuario.nombre if usuario else '' }}"
+                                   placeholder="ej: Juan Pérez"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label>
+                            <span>📧</span> Email
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">✉️</span>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   value="{{ usuario.email if usuario else '' }}"
+                                   placeholder="ej: juan@email.com"
+                                   required
+                                   onkeyup="validateEmail(this)">
+                        </div>
+                        <div id="emailError" class="error-message"></div>
+                    </div>
+
+                    <!-- Rol -->
+                    <div class="form-group">
+                        <label>
+                            <span>🎯</span> Rol
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">⚙️</span>
+                            <select class="form-control" id="rol" name="rol" onchange="togglePlanField()" required>
+                                <option value="cliente" {% if not usuario or usuario.rol == 'cliente' %}selected{% endif %}>Cliente</option>
+                                <option value="admin" {% if usuario and usuario.rol == 'admin' %}selected{% endif %}>Administrador</option>
+                            </select>
+                        </div>
+                        <div class="help-text">
+                            <span>ℹ️</span> Los administradores tienen acceso completo
+                        </div>
+                    </div>
+
+                    <!-- Plan (solo para clientes) -->
+                    <div class="form-group" id="plan-field">
+                        <label>
+                            <span>📱</span> Plan
+                            {% if not usuario or usuario.rol == 'cliente' %}<span class="required">*</span>{% endif %}
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📊</span>
+                            <select class="form-control" id="plan" name="plan" {% if not usuario or usuario.rol == 'cliente' %}required{% endif %}>
+                                <option value="">Seleccionar plan...</option>
+                                {% for plan in planes %}
+                                <option value="{{ plan.nombre }}" 
+                                        {% if usuario and usuario.plan == plan.nombre %}selected{% endif %}>
+                                    {{ plan.nombre }} - ${{ plan.precio }}/mes
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="help-text">
+                            <span>ℹ️</span> El plan asignado al cliente
+                        </div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="form-group full-width">
+                        <label>
+                            <span>🔒</span> 
+                            {% if usuario %}Nueva Contraseña (dejar en blanco para mantener){% else %}Contraseña{% endif %}
+                            {% if not usuario %}<span class="required">*</span>{% endif %}
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🔑</span>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password" 
+                                   name="password" 
+                                   {% if not usuario %}required{% endif %}
+                                   placeholder="{% if usuario %}••••••••{% else %}Ingresa una contraseña segura{% endif %}"
+                                   onkeyup="checkPasswordStrength(this)">
+                            <button type="button" class="input-icon" style="right: 15px; left: auto; background: none; border: none; cursor: pointer;" onclick="togglePassword()">
+                                👁️
+                            </button>
+                        </div>
+                        
+                        <!-- Indicador de fortaleza de contraseña -->
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-progress" id="strengthProgress"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText">Ingresa una contraseña</span>
+                        </div>
+
+                        {% if usuario %}
+                        <div class="help-text warning">
+                            <span>⚠️</span> Deja en blanco para mantener la contraseña actual
+                        </div>
+                        {% else %}
+                        <div class="help-text">
+                            <span>💡</span> Mínimo 8 caracteres, incluye números y mayúsculas
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Confirmar Contraseña (solo para nuevo usuario) -->
+                    {% if not usuario %}
+                    <div class="form-group full-width">
+                        <label>
+                            <span>✓</span> Confirmar Contraseña
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="confirmPassword" 
+                                   name="confirmPassword" 
+                                   required
+                                   placeholder="Repite la contraseña"
+                                   onkeyup="validatePasswordMatch()">
+                        </div>
+                        <div id="passwordMatchError" class="error-message"></div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Usuario Activo (solo para edición) -->
+                    {% if usuario %}
+                    <div class="form-group full-width">
+                        <label style="position: relative;">
+                            <span>⚡</span> Estado del Usuario
+                        </label>
+                        <div style="display: flex; align-items: center;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="activo" name="activo" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label">Usuario activo en el sistema</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Acciones del Formulario -->
+                <div class="form-actions">
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-secondary">
+                        <span>✖️</span> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span>💾</span> 
+                        {% if usuario %}Guardar Cambios{% else %}Crear Usuario{% endif %}
+                    </button>
+                    {% if usuario and usuario.username != session['username'] and usuario.username != 'admin' %}
+                    <a href="#" class="btn btn-danger" onclick="confirmDelete('{{ usuario.username }}')">
+                        <span>🗑️</span> Eliminar
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Información adicional -->
+        <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 10px; font-size: 0.9rem; color: #7f8c8d; text-align: center;">
+            <p>📋 Los campos marcados con <span class="required">*</span> son obligatorios</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== FUNCIONES DEL FORMULARIO ==========
+
+        // Mostrar/ocultar campo de plan según rol
+        function togglePlanField() {
+            const rol = document.getElementById('rol').value;
+            const planField = document.getElementById('plan-field');
+            const planSelect = document.getElementById('plan');
+            
+            if (rol === 'admin') {
+                planField.style.display = 'none';
+                planSelect.required = false;
+            } else {
+                planField.style.display = 'block';
+                planSelect.required = true;
+            }
+        }
+
+        // Toggle mostrar contraseña
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+        }
+
+        // Validar email
+        function validateEmail(input) {
+            const email = input.value;
+            const errorDiv = document.getElementById('emailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                input.classList.add('error');
+                errorDiv.textContent = '❌ Ingresa un email válido';
+                return false;
+            } else {
+                input.classList.remove('error');
+                errorDiv.textContent = '';
+                return true;
+            }
+        }
+
+        // Validar username
+        function validateUsername(input) {
+            const username = input.value;
+            const errorDiv = document.getElementById('usernameError');
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            
+            if (username && !usernameRegex.test(username)) {
+                input.classList.add('error');
+                errorDiv.textContent = '❌ Solo letras, números y guión bajo';
+                return false;
+            } else if (username && username.length < 3) {
+                input.classList.add('error');
+                errorDiv.textContent = '❌ Mínimo 3 caracteres';
+                return false;
+            } else {
+                input.classList.remove('error');
+                errorDiv.textContent = '';
+                return true;
+            }
+        }
+
+        // Validar fortaleza de contraseña
+        function checkPasswordStrength(input) {
+            const password = input.value;
+            const strengthProgress = document.getElementById('strengthProgress');
+            const strengthText = document.getElementById('strengthText');
+            
+            if (!password) {
+                strengthProgress.style.width = '0';
+                strengthText.textContent = 'Ingresa una contraseña';
+                return;
+            }
+            
+            let strength = 0;
+            
+            // Longitud
+            if (password.length >= 8) strength += 25;
+            if (password.length >= 12) strength += 10;
+            
+            // Mayúsculas
+            if (/[A-Z]/.test(password)) strength += 20;
+            
+            // Números
+            if (/[0-9]/.test(password)) strength += 20;
+            
+            // Caracteres especiales
+            if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+            
+            strengthProgress.style.width = strength + '%';
+            
+            if (strength < 30) {
+                strengthProgress.style.backgroundColor = '#e74c3c';
+                strengthText.textContent = '🔴 Contraseña débil';
+            } else if (strength < 60) {
+                strengthProgress.style.backgroundColor = '#f39c12';
+                strengthText.textContent = '🟡 Contraseña media';
+            } else {
+                strengthProgress.style.backgroundColor = '#27ae60';
+                strengthText.textContent = '🟢 Contraseña fuerte';
+            }
+        }
+
+        // Validar coincidencia de contraseñas
+        function validatePasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword')?.value;
+            const errorDiv = document.getElementById('passwordMatchError');
+            
+            if (password !== confirm) {
+                errorDiv.textContent = '❌ Las contraseñas no coinciden';
+                return false;
+            } else {
+                errorDiv.textContent = '';
+                return true;
+            }
+        }
+
+        // Validar formulario completo
+        function validateForm() {
+            const username = document.getElementById('username').value;
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const rol = document.getElementById('rol').value;
+            const password = document.getElementById('password').value;
+            
+            // Validar campos requeridos
+            if (!username || !nombre || !email || !rol) {
+                alert('❌ Por favor, completa todos los campos requeridos');
+                return false;
+            }
+            
+            // Validar email
+            if (!validateEmail(document.getElementById('email'))) {
+                alert('❌ El email no es válido');
+                return false;
+            }
+            
+            // Validar username
+            if (!validateUsername(document.getElementById('username'))) {
+                alert('❌ El nombre de usuario no es válido');
+                return false;
+            }
+            
+            // Validar contraseña para nuevo usuario
+            {% if not usuario %}
+            if (!password) {
+                alert('❌ La contraseña es requerida');
+                return false;
+            }
+            
+            if (password.length < 8) {
+                alert('❌ La contraseña debe tener al menos 8 caracteres');
+                return false;
+            }
+            
+            if (!validatePasswordMatch()) {
+                alert('❌ Las contraseñas no coinciden');
+                return false;
+            }
+            {% endif %}
+            
+            // Validar plan para cliente
+            if (rol === 'cliente') {
+                const plan = document.getElementById('plan').value;
+                if (!plan) {
+                    alert('❌ Debes seleccionar un plan para el cliente');
+                    return false;
+                }
+            }
+            
+            // Mostrar loading
+            showLoading();
+            
+            return true;
+        }
+
+        // Mostrar loading
+        function showLoading() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Procesando...';
+        }
+
+        // Confirmar eliminación
+        function confirmDelete(username) {
+            if (confirm(`¿Estás seguro de eliminar al usuario ${username}?\n\n⚠️ Esta acción no se puede deshacer.`)) {
+                window.location.href = "{{ url_for('admin_eliminar_usuario', username='') }}" + username;
+            }
+        }
+
+        // Vista previa en tiempo real
+        document.getElementById('nombre')?.addEventListener('keyup', function(e) {
+            const preview = document.querySelector('.preview-info h3');
+            if (preview) {
+                preview.textContent = e.target.value || '{{ usuario.nombre }}';
+            }
+        });
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S para guardar
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                document.querySelector('form').submit();
+            }
+            
+            // Escape para cancelar
+            if (e.key === 'Escape') {
+                if (confirm('¿Cancelar cambios?')) {
+                    window.location.href = "{{ url_for('admin_usuarios') }}";
+                }
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar/ocultar plan según rol
+            togglePlanField();
+            
+            // Enfocar primer campo
+            setTimeout(() => {
+                const firstInput = document.querySelector('input:not([readonly])');
+                if (firstInput) firstInput.focus();
+            }, 500);
+            
+            console.log('📝 Formulario de usuario cargado');
+        });
+
+        // Auto-guardado (opcional)
+        let autoSaveTimer;
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('keyup', function() {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    console.log('💾 Auto-guardado...');
+                    // Aquí iría la lógica de auto-guardado
+                }, 2000);
+            });
+        });
+
+        // Prevenir envío con Enter en campos específicos
+        document.querySelectorAll('input:not([type="password"])').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nextInput = this.closest('.form-group').nextElementSibling?.querySelector('input, select');
+                    if (nextInput) {
+                        nextInput.focus();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

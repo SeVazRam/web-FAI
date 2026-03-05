@@ -1,0 +1,1369 @@
+<!-- templates/cliente_dashboard.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Dashboard - Telecom Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* ========== CONTAINER PRINCIPAL ========== */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* ========== WELCOME SECTION ========== */
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-content h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .date-badge {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+        }
+
+        /* ========== CURRENT PLAN CARD ========== */
+        .current-plan-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #27ae60;
+            animation: slideIn 0.5s ease 0.1s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-plan-card::after {
+            content: 'ACTIVE PLAN';
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: #27ae60;
+            color: white;
+            padding: 0.3rem 3rem;
+            transform: rotate(45deg);
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .plan-title h3 {
+            color: #7f8c8d;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+
+        .plan-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .plan-price {
+            text-align: right;
+        }
+
+        .plan-price .amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .plan-price .period {
+            color: #95a5a6;
+            font-size: 0.9rem;
+        }
+
+        .plan-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem 0;
+            border-top: 2px dashed #f0f2f5;
+            border-bottom: 2px dashed #f0f2f5;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .feature-text h4 {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+        }
+
+        .feature-text p {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .plan-usage {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .usage-item {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .usage-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f2f5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        /* ========== PLANS SECTION ========== */
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .plan-card.current {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
+        }
+
+        .plan-card.current::before {
+            content: '✓ CURRENT PLAN';
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background: #27ae60;
+            color: white;
+            padding: 0.3rem 3rem;
+            transform: rotate(45deg);
+            font-size: 0.7rem;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .plan-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .plan-card-title h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .plan-card-price {
+            text-align: right;
+        }
+
+        .plan-card-price .amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .plan-card-price .period {
+            color: #95a5a6;
+            font-size: 0.7rem;
+            display: block;
+        }
+
+        .plan-card-description {
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .plan-card-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-card-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #2c3e50;
+            border-bottom: 1px dashed #f0f2f5;
+        }
+
+        .plan-card-features li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-check {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+            cursor: default;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* ========== COMPARISON TABLE ========== */
+        .comparison-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .comparison-table th {
+            padding: 1rem;
+            text-align: left;
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .comparison-table .current-row {
+            background: #f0f9ff;
+        }
+
+        .recommended-badge {
+            background: #f39c12;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }
+
+        /* ========== USAGE TIPS ========== */
+        .tips-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tip-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tip-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .tip-text {
+            flex: 1;
+        }
+
+        .tip-text h4 {
+            color: #2c3e50;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .tip-text p {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        /* ========== FLASH MESSAGES ========== */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        /* ========== MODAL ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #95a5a6;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .modal-plan-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+                text-align: center;
+            }
+
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .welcome-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .date-badge {
+                position: static;
+                margin-top: 1rem;
+                display: inline-block;
+            }
+
+            .plan-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .plan-price {
+                text-align: center;
+            }
+
+            .plan-name {
+                font-size: 2rem;
+            }
+
+            .plan-features {
+                grid-template-columns: 1fr;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .plan-name {
+                font-size: 1.5rem;
+            }
+
+            .plan-price .amount {
+                font-size: 2rem;
+            }
+
+            .feature-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .plan-usage {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal de Confirmación -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔄 Confirmar Cambio de Plan</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <p id="modalMessage">Are you sure you want to switch to this plan?</p>
+                <div class="modal-plan-details" id="modalPlanDetails"></div>
+                <p style="font-size: 0.9rem; color: #e74c3c;">
+                    ⚠️ The change will be immediate and will be reflected in your next bill.
+                </p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <a href="#" id="confirmAction" class="btn btn-primary">Confirm Change</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span style="font-size: 1.5rem;">📱</span>
+            <h1>Telecom Portal</h1>
+        </div>
+        
+        <div class="user-menu">
+            <span>👋 Hello, <strong>{{ nombre }}</strong></span>
+            <span> Change Password -></span>
+            <a href="{{ url_for('cambiar_password') }}" class="change-password-btn" title="Change password">
+        🔐
+    </a>
+    <div class="user-avatar">
+        {{ nombre[:2]|upper }}
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+        <span>🚪</span> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        <span>
+                            {% if category == 'success' %}✅
+                            {% elif category == 'error' %}❌
+                            {% else %}ℹ️{% endif %}
+                        </span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-content">
+                <h2>Welcome, {{ nombre }}! 👋</h2>
+                <p>Manage your phone plan and discover the best options for you</p>
+            </div>
+            <div class="date-badge">
+                📅 {{ datetime.now().strftime('%d/%m/%Y') }}
+            </div>
+        </div>
+
+        <!-- Current Plan Card -->
+        <div class="current-plan-card">
+            <div class="plan-header">
+                <div class="plan-title">
+                    <h3>Your Current Plan</h3>
+                    <div class="plan-name">{{ plan_actual }}</div>
+                </div>
+                <div class="plan-price">
+                    {% for plan in planes %}
+                        {% if plan.nombre == plan_actual %}
+                            <span class="amount">${{ "%.2f"|format(plan.precio) }}</span>
+                            <span class="period">/mes</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Plan Features -->
+            <div class="plan-features">
+                {% for plan in planes %}
+                    {% if plan.nombre == plan_actual %}
+                        <div class="feature-item">
+                            <div class="feature-icon">📞</div>
+                            <div class="feature-text">
+                                <h4>Minutes</h4>
+                                <p>{{ plan.minutos }}</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📱</div>
+                            <div class="feature-text">
+                                <h4>Mobile data</h4>
+                                <p>{{ plan.datos }}</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💬</div>
+                            <div class="feature-text">
+                                <h4>SMS</h4>
+                                <p>{{ plan.sms }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Usage Statistics -->
+            <div class="plan-usage">
+                <div class="usage-item">
+                    <div class="usage-label">
+                        <span>Data consumed</span>
+                        <span>65%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                </div>
+                <div class="usage-item">
+                    <div class="usage-label">
+                        <span>Minutes used</span>
+                        <span>42%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 42%"></div>
+                    </div>
+                </div>
+                <div class="usage-item">
+                    <div class="usage-label">
+                        <span>Remaining days</span>
+                        <span>15 days</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Plans Section -->
+        <div class="section-title">
+            <h2>
+                <span>📱</span>
+                Available Plans
+            </h2>
+            <p>Choose the plan that best suits you</p>
+        </div>
+
+        <div class="plans-grid" id="plansGrid">
+            {% for plan in planes %}
+            <div class="plan-card {% if plan.nombre == plan_actual %}current{% endif %}" 
+                 data-id="{{ plan.id }}"
+                 data-nombre="{{ plan.nombre }}"
+                 data-precio="{{ plan.precio }}"
+                 data-minutos="{{ plan.minutos }}"
+                 data-datos="{{ plan.datos }}"
+                 data-sms="{{ plan.sms }}"
+                 data-descripcion="{{ plan.descripcion }}">
+                
+                {% if loop.first and plan.nombre != plan_actual %}
+                <div class="popular-badge">⭐ MOST POPULAR</div>
+                {% endif %}
+                
+                <div class="plan-card-header">
+                    <div class="plan-card-title">
+                        <h3>{{ plan.nombre }}</h3>
+                    </div>
+                    <div class="plan-card-price">
+                        <span class="amount">${{ "%.2f"|format(plan.precio) }}</span>
+                        <span class="period">/month</span>
+                    </div>
+                </div>
+
+                <p class="plan-card-description">{{ plan.descripcion }}</p>
+
+                <ul class="plan-card-features">
+                    <li>
+                        <span class="feature-check">✓</span>
+                        <span>{{ plan.minutos }} minutes</span>
+                    </li>
+                    <li>
+                        <span class="feature-check">✓</span>
+                        <span>{{ plan.datos }} of data</span>
+                    </li>
+                    <li>
+                        <span class="feature-check">✓</span>
+                        <span>{{ plan.sms }} SMS</span>
+                    </li>
+                    <li>
+                        <span class="feature-check">✓</span>
+                        <span>24/7 Support</span>
+                    </li>
+                </ul>
+
+                {% if plan.nombre == plan_actual %}
+                    <button class="btn btn-success" disabled>
+                        <span>✅</span> Current Plan
+                    </button>
+                {% else %}
+                    <button class="btn btn-primary" onclick="showConfirmModal({{ plan.id }})">
+                        <span>🔄</span> Switch to this plan
+                    </button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-section">
+            <h3 style="margin-bottom: 1rem; color: #2c3e50;">📊 Plan Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Features</th>
+                        {% for plan in planes %}
+                        <th {% if plan.nombre == plan_actual %}style="background: #e3f2fd;"{% endif %}>
+                            {{ plan.nombre }}
+                            {% if plan.nombre == plan_actual %}
+                                <span style="color: #27ae60; font-size: 0.8rem; display: block;">(Actual)</span>
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr {% if plan_actual == planes[0].nombre %}class="current-row"{% endif %}>
+                        <td><strong>Price</strong></td>
+                        {% for plan in planes %}
+                        <td>${{ "%.2f"|format(plan.precio) }}/mes</td>
+                        {% endfor %}
+                    </tr>
+                    <tr {% if plan_actual == planes[0].nombre %}class="current-row"{% endif %}>
+                        <td><strong>Minutes</strong></td>
+                        {% for plan in planes %}
+                        <td>{{ plan.minutos }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr {% if plan_actual == planes[0].nombre %}class="current-row"{% endif %}>
+                        <td><strong>Mobile Data</strong></td>
+                        {% for plan in planes %}
+                        <td>{{ plan.datos }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr {% if plan_actual == planes[0].nombre %}class="current-row"{% endif %}>
+                        <td><strong>SMS</strong></td>
+                        {% for plan in planes %}
+                        <td>{{ plan.sms }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr {% if plan_actual == planes[0].nombre %}class="current-row"{% endif %}>
+                        <td><strong>Support</strong></td>
+                        {% for plan in planes %}
+                        <td>24/7</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Usage Tips -->
+        <div class="tips-section">
+            <h3 style="color: #2c3e50; margin-bottom: 1rem;">💡 Tips for getting the most out of your plan</h3>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">📊</div>
+                    <div class="tip-text">
+                        <h4>Monitor your consumption</h4>
+                        <p>Check the progress bars to avoid exceeding your goal.</p>
+                    </div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🔄</div>
+                    <div class="tip-text">
+                        <h4>Change whenever you want</h4>
+                        <p>Plan changes are immediate and without penalty.</p>
+                    </div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📱</div>
+                    <div class="tip-text">
+                        <h4>App incluided</h4>
+                        <p>Manage everything from our mobile app</p>
+                    </div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🎁</div>
+                    <div class="tip-text">
+                        <h4>Special offers</h4>
+                        <p>Receive exclusive offers in your email</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 10px; text-align: center; color: #7f8c8d; font-size: 0.9rem;">
+            <p>📅 Ciclo de facturación: Día 15 de cada mes</p>
+            <p style="margin-top: 0.3rem;">💳 Próximo pago: 15 de {{ datetime.now().strftime('%B, %Y') }}</p>
+        </div>
+    </div>
+
+
+    <script>
+        // ========== VARIABLES GLOBALES ==========
+        let selectedPlan = null;
+        let currentPlan = "{{ plan_actual }}";
+
+        // ========== FUNCIONES DEL MODAL ==========
+
+        // Mostrar modal de confirmación
+        function showConfirmModal(planId) {
+            // Buscar el plan seleccionado
+            const planCard = document.querySelector(`.plan-card[data-id="${planId}"]`);
+            
+            selectedPlan = {
+                id: planId,
+                nombre: planCard.dataset.nombre,
+                precio: planCard.dataset.precio,
+                minutos: planCard.dataset.minutos,
+                datos: planCard.dataset.datos,
+                sms: planCard.dataset.sms,
+                descripcion: planCard.dataset.descripcion
+            };
+
+            // Actualizar modal
+            document.getElementById('modalMessage').innerHTML = 
+                `Are you sure you want to switch to the plan <strong>${selectedPlan.nombre}</strong>?`;
+
+            document.getElementById('modalPlanDetails').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; text-align: center;">
+                    <div>
+                        <div style="color: #7f8c8d; font-size: 0.7rem;">PRICE</div>
+                        <div style="color: #27ae60; font-weight: bold;">$${parseFloat(selectedPlan.precio).toFixed(2)}</div>
+                    </div>
+                    <div>
+                        <div style="color: #7f8c8d; font-size: 0.7rem;">MOBILE DATA</div>
+                        <div style="font-weight: bold;">${selectedPlan.datos}</div>
+                    </div>
+                    <div>
+                        <div style="color: #7f8c8d; font-size: 0.7rem;">MINUTES</div>
+                        <div style="font-weight: bold;">${selectedPlan.minutos}</div>
+                    </div>
+                </div>
+            `;
+
+            // Configurar acción de confirmación
+            document.getElementById('confirmAction').href = 
+                "{{ url_for('cliente_cambiar_plan', plan_id=0) }}".replace('0', planId);
+
+            // Mostrar modal
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            selectedPlan = null;
+        }
+
+        // ========== FUNCIONES DE FILTRO ==========
+
+        // Filtrar planes por precio
+        function filterPlansByPrice(maxPrice) {
+            const cards = document.querySelectorAll('.plan-card');
+            
+            cards.forEach(card => {
+                const price = parseFloat(card.dataset.precio);
+                if (price <= maxPrice) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Ordenar planes por precio
+        function sortPlansByPrice(ascending = true) {
+            const grid = document.getElementById('plansGrid');
+            const cards = Array.from(grid.children);
+            
+            cards.sort((a, b) => {
+                const priceA = parseFloat(a.dataset.precio);
+                const priceB = parseFloat(b.dataset.precio);
+                return ascending ? priceA - priceB : priceB - priceA;
+            });
+            
+            cards.forEach(card => grid.appendChild(card));
+        }
+
+        // ========== ANIMACIONES Y EFECTOS ==========
+
+        // Resaltar plan actual
+        function highlightCurrentPlan() {
+            const currentCard = document.querySelector('.plan-card.current');
+            if (currentCard) {
+                currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Calcular ahorro potencial
+        function calculateSavings() {
+            // Esta función calcularía cuánto ahorraría el cliente cambiando a otro plan
+            console.log('Calculando ahorros...');
+        }
+
+        // ========== EVENTOS ==========
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('confirmModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📱 Dashboard de cliente cargado');
+            
+            // Animar cards
+            document.querySelectorAll('.plan-card').forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Mostrar mensaje de bienvenida
+            setTimeout(() => {
+                if (!localStorage.getItem('welcomeShown')) {
+                    alert('👋 Welcome to your portal! You can manage your plan from here..');
+                    localStorage.setItem('welcomeShown', 'true');
+                }
+            }, 1000);
+        });
+
+        // ========== CÁLCULOS ==========
+
+        // Calcular porcentaje de uso
+        function calculateUsage(used, total) {
+            return Math.min(Math.round((used / total) * 100), 100);
+        }
+
+        // Calcular días restantes del ciclo
+        function getDaysRemaining() {
+            const today = new Date();
+            const billingDay = 15;
+            let nextBilling = new Date(today.getFullYear(), today.getMonth(), billingDay);
+            
+            if (today.getDate() > billingDay) {
+                nextBilling.setMonth(nextBilling.getMonth() + 1);
+            }
+            
+            const diffTime = nextBilling - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            return diffDays;
+        }
+
+        // Actualizar días restantes en la UI
+        function updateDaysRemaining() {
+            const days = getDaysRemaining();
+            const daysElement = document.querySelector('.usage-item:last-child .usage-label span:last-child');
+            if (daysElement) {
+                daysElement.textContent = days + ' días';
+            }
+        }
+
+        // Llamar a la actualización cada minuto
+        setInterval(updateDaysRemaining, 60000);
+
+        // ========== RECOMENDACIONES ==========
+
+        // Recomendar plan basado en uso
+        function recommendPlan() {
+            // Esta función analizaría el uso del cliente y recomendaría el mejor plan
+            const usage = 65; // Porcentaje de uso actual
+            
+            const plans = {{ planes|tojson }};
+            let recommended = plans[0];
+            
+            if (usage > 80) {
+                // Si usa mucho, recomendar plan superior
+                recommended = plans[plans.length - 1];
+            } else if (usage < 30) {
+                // Si usa poco, recomendar plan básico
+                recommended = plans[0];
+            }
+            
+            return recommended;
+        }
+
+        // ========== PREFERENCIAS DEL USUARIO ==========
+
+        // Guardar preferencia de ordenamiento
+        function saveSortPreference(method) {
+            localStorage.setItem('planSortPreference', method);
+        }
+
+        // Cargar preferencia de ordenamiento
+        function loadSortPreference() {
+            const saved = localStorage.getItem('planSortPreference');
+            if (saved) {
+                if (saved === 'price-asc') sortPlansByPrice(true);
+                if (saved === 'price-desc') sortPlansByPrice(false);
+            }
+        }
+
+        // Ejecutar carga de preferencias
+        loadSortPreference();
+
+        // ========== COMPARTIR PLAN ==========
+
+        function sharePlan(planName) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Plan ' + planName,
+                    text: 'Mira este plan de Telecom Portal',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                alert('Comparte este plan con tus amigos: ' + planName);
+            }
+        }
+
+        // ========== NOTIFICACIONES ==========
+
+        // Simular notificación de oferta
+        function showOfferNotification() {
+            setTimeout(() => {
+                const offer = document.createElement('div');
+                offer.className = 'flash-success';
+                offer.innerHTML = `
+                    <span>🎁</span>
+                    ¡Oferta especial! 20% de descuento en Plan Premium este mes
+                `;
+                document.querySelector('.flash-messages').appendChild(offer);
+                
+                setTimeout(() => offer.remove(), 5000);
+            }, 3000);
+        }
+
+        // Mostrar oferta después de un tiempo
+        showOfferNotification();
+
+        // ========== ESTADÍSTICAS DE USO ==========
+
+        // Simular datos de uso
+        const usageData = {
+            datos: 65,
+            minutos: 42,
+            sms: 80
+        };
+
+        // Actualizar barras de progreso
+        function updateUsageBars() {
+            const bars = document.querySelectorAll('.progress-fill');
+            const values = [usageData.datos, usageData.minutos, 50]; // 50% para días restantes
+            
+            bars.forEach((bar, index) => {
+                bar.style.width = values[index] + '%';
+            });
+        }
+
+        // Llamar a la actualización cada 30 segundos (simulado)
+        setInterval(() => {
+            // Simular cambio en el uso
+            usageData.datos = Math.min(100, usageData.datos + Math.random() * 5);
+            usageData.minutos = Math.min(100, usageData.minutos + Math.random() * 3);
+            
+            updateUsageBars();
+        }, 30000);
+    </script>
+</body>
+</html>
