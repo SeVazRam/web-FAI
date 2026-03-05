@@ -1,0 +1,1116 @@
+<!-- templates/admin_editar_plan.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if plan %}Editar{% else %}Nuevo{% endif %} Plan - Telecom Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* ========== CONTAINER PRINCIPAL ========== */
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* ========== BREADCRUMB ========== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .breadcrumb i {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+
+        /* ========== CARD PRINCIPAL ========== */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== CARD HEADER ========== */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .header-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .header-title h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .header-title p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        /* ========== PREVIEW CARD ========== */
+        .preview-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .preview-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .preview-price {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .preview-price small {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .preview-features {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .preview-feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* ========== FORM ========== */
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .required {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-left: 3px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            font-size: 1.1rem;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            font-size: 0.9rem;
+            background: #f0f2f5;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-control.with-suffix {
+            padding-right: 80px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control:hover {
+            border-color: #b0b0b0;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            padding-top: 15px;
+        }
+
+        /* ========== HELP TEXT ========== */
+        .help-text {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .help-text i {
+            font-size: 1rem;
+        }
+
+        .help-text.warning {
+            color: #e67e22;
+        }
+
+        .help-text.success {
+            color: #27ae60;
+        }
+
+        /* ========== TOGGLE SWITCH ========== */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #27ae60;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            margin-left: 70px;
+            display: block;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        /* ========== FORM ACTIONS ========== */
+        .form-actions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* ========== FLASH MESSAGES ========== */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ========== VALIDATION STYLES ========== */
+        .form-control.error {
+            border-color: #e74c3c;
+        }
+
+        .form-control.error:focus {
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ========== LOADING SPINNER ========== */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== SUGGESTIONS ========== */
+        .suggestions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .suggestions-title {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .suggestion-tag {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 0.3rem 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .suggestion-tag:hover {
+            background: #667eea;
+            color: white;
+            border-color: transparent;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .preview-features {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title h2 {
+                font-size: 1.5rem;
+            }
+            
+            .header-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 2rem;
+            }
+            
+            .preview-price {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span style="font-size: 1.5rem;">📊</span>
+            <h1>Telecom Admin</h1>
+        </div>
+        
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="{{ url_for('admin_usuarios') }}">
+                <span>👥</span> Users
+            </a>
+            <a href="{{ url_for('admin_planes') }}" class="active">
+                <span>📱</span> Plans
+            </a>
+            <a href="{{ url_for('admin_exportar') }}">
+                <span>📤</span> Export
+            </a>
+        </div>
+        
+        <div class="user-menu">
+            <span>👋 Hello, {{ session['username'] }}</span>
+            <div class="user-avatar" onclick="window.location.href='{{ url_for('logout') }}'" title="Cerrar sesión">
+                🚪
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+            <span>›</span>
+            <a href="{{ url_for('admin_planes') }}">Planes</a>
+            <span>›</span>
+            <span>{% if plan %}Editar {{ plan.nombre }}{% else %}Nuevo Plan{% endif %}</span>
+        </div>
+
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        <span>
+                            {% if category == 'success' %}✅
+                            {% elif category == 'error' %}❌
+                            {% else %}ℹ️{% endif %}
+                        </span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Card Principal -->
+        <div class="card">
+            <div class="card-header">
+                <div class="header-icon">
+                    {% if plan %}✏️{% else %}➕{% endif %}
+                </div>
+                <div class="header-title">
+                    <h2>{% if plan %}Edite Plan: {{ plan.nombre }}{% else %}New Phone Plan{% endif %}</h2>
+                    <p>
+                        {% if plan %}
+                            Modify the characteristics of the existing plan
+                        {% else %}
+                            Complete the form to create a new plan
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Vista Previa en Tiempo Real -->
+            <div class="preview-card" id="previewCard">
+                <div class="preview-header">
+                    <span class="preview-title" id="previewName">{{ plan.nombre if plan else 'Nombre del Plan' }}</span>
+                    <span class="preview-price" id="previewPrice">
+                        ${{ "%.2f"|format(plan.precio if plan else 0) }} <small>/mes</small>
+                    </span>
+                </div>
+                <p id="previewDescription">{{ plan.descripcion if plan else 'Descripción del plan...' }}</p>
+                <div class="preview-features">
+                    <span class="preview-feature" id="previewMinutes">📞 {{ plan.minutos if plan else '300' }} min</span>
+                    <span class="preview-feature" id="previewData">📱 {{ plan.datos if plan else '5GB' }}</span>
+                    <span class="preview-feature" id="previewSms">💬 {{ plan.sms if plan else 'Unlimited' }}</span>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <form class="form" method="POST" onsubmit="return validateForm()">
+                <div class="form-grid">
+                    <!-- Nombre del Plan -->
+                    <div class="form-group full-width">
+                        <label>
+                            <span>📋</span> Name of Plan
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📱</span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="nombre" 
+                                   name="nombre" 
+                                   value="{{ plan.nombre if plan else '' }}"
+                                   placeholder="ej: Plan Premium, Familiar, etc."
+                                   required
+                                   onkeyup="updatePreview()">
+                        </div>
+                        <div class="help-text">
+                            <span>💡</span> Choose a descriptive and easy-to-remember name
+                        </div>
+                    </div>
+
+                    <!-- Precio -->
+                    <div class="form-group">
+                        <label>
+                            <span>💰</span> Monthly Price
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">$</span>
+                            <input type="number" 
+                                   class="form-control with-suffix" 
+                                   id="precio" 
+                                   name="precio" 
+                                   step="0.01" 
+                                   min="0"
+                                   value="{{ plan.precio if plan else '' }}"
+                                   placeholder="0.00"
+                                   required
+                                   onkeyup="updatePreview()">
+                            <span class="input-suffix">USD/month</span>
+                        </div>
+                    </div>
+
+                    <!-- Minutos -->
+                    <div class="form-group">
+                        <label>
+                            <span>📞</span> Minutes
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">⏱️</span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="minutos" 
+                                   name="minutos" 
+                                   value="{{ plan.minutos if plan else '' }}"
+                                   placeholder="ej: 300, Ilimitados"
+                                   required
+                                   onkeyup="updatePreview()">
+                        </div>
+                        <div class="help-text">
+                            <span>💡</span> You can enter a number or "Unlimited""
+                        </div>
+                    </div>
+
+                    <!-- Datos -->
+                    <div class="form-group">
+                        <label>
+                            <span>📱</span> Mobile data
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📶</span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="datos" 
+                                   name="datos" 
+                                   value="{{ plan.datos if plan else '' }}"
+                                   placeholder="ej: 5GB, 10GB, Ilimitado"
+                                   required
+                                   onkeyup="updatePreview()">
+                        </div>
+                    </div>
+
+                    <!-- SMS -->
+                    <div class="form-group">
+                        <label>
+                            <span>💬</span> SMS
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">✉️</span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="sms" 
+                                   name="sms" 
+                                   value="{{ plan.sms if plan else '' }}"
+                                   placeholder="ej: Ilimitados, 1000"
+                                   required
+                                   onkeyup="updatePreview()">
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="form-group full-width">
+                        <label>
+                            <span>📝</span> Description
+                            <span class="required">*</span>
+                        </label>
+                        <textarea class="form-control" 
+                                  id="descripcion" 
+                                  name="descripcion" 
+                                  rows="4"
+                                  placeholder="Describe the benefits and features of the plan..."
+                                  required
+                                  onkeyup="updatePreview()">{{ plan.descripcion if plan else '' }}</textarea>
+                        <div class="help-text">
+                            <span>💡</span> A good description helps customers choose the right plan
+                        </div>
+                    </div>
+
+                    <!-- Sugerencias de descripción -->
+                    <div class="form-group full-width">
+                        <div class="suggestions">
+                            <div class="suggestions-title">📋 Suggestions for the description:</div>
+                            <div class="suggestion-tags">
+                                <span class="suggestion-tag" onclick="addToDescription('Ideal for individual use')">Ideal for individual use</span>
+                                <span class="suggestion-tag" onclick="addToDescription('Perfect for families')">Perfect for families</span>
+                                <span class="suggestion-tag" onclick="addToDescription('Include social media access')">Include social media access</span>
+                                <span class="suggestion-tag" onclick="addToDescription('Roaming included')">Roaming incluide</span>
+                                <span class="suggestion-tag" onclick="addToDescription('24/7 priority support')">24/7 priority support</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plan Activo -->
+                    {% if plan %}
+                    <div class="form-group full-width">
+                        <label>
+                            <span>⚡</span> Plan Status
+                        </label>
+                        <div style="display: flex; align-items: center;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="activo" name="activo" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label">Active plan available for customers</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Acciones del Formulario -->
+                <div class="form-actions">
+                    <a href="{{ url_for('admin_planes') }}" class="btn btn-secondary">
+                        <span>✖️</span> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span>💾</span> 
+                        {% if plan %}Save Changes{% else %}Create Plan{% endif %}
+                    </button>
+                    {% if plan %}
+                    <a href="#" class="btn btn-danger" onclick="confirmDelete({{ plan.id }}, '{{ plan.nombre }}')">
+                        <span>🗑️</span> Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Información adicional -->
+        <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 10px; font-size: 0.9rem; color: #7f8c8d; text-align: center;">
+            <p>📋 Los campos marcados con <span class="required">*</span> son obligatorios</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== FUNCIONES DEL FORMULARIO ==========
+
+        // Actualizar vista previa en tiempo real
+        function updatePreview() {
+            const nombre = document.getElementById('nombre').value || 'Name of Plan';
+            const precio = document.getElementById('precio').value || '0';
+            const minutos = document.getElementById('minutos').value || '0';
+            const datos = document.getElementById('datos').value || '0GB';
+            const sms = document.getElementById('sms').value || '0';
+            const descripcion = document.getElementById('descripcion').value || 'Plan description...';
+            
+            document.getElementById('previewName').textContent = nombre;
+            document.getElementById('previewPrice').innerHTML = `$${parseFloat(precio).toFixed(2)} <small>/mes</small>`;
+            document.getElementById('previewMinutes').innerHTML = `📞 ${minutos} min`;
+            document.getElementById('previewData').innerHTML = `📱 ${datos}`;
+            document.getElementById('previewSms').innerHTML = `💬 ${sms}`;
+            document.getElementById('previewDescription').textContent = descripcion;
+        }
+
+        // Añadir texto a la descripción
+        function addToDescription(text) {
+            const descripcion = document.getElementById('descripcion');
+            const currentText = descripcion.value;
+            
+            if (currentText) {
+                descripcion.value = currentText + '. ' + text;
+            } else {
+                descripcion.value = text;
+            }
+            
+            updatePreview();
+            descripcion.focus();
+        }
+
+        // Validar formulario
+        function validateForm() {
+            const nombre = document.getElementById('nombre').value;
+            const precio = document.getElementById('precio').value;
+            const minutos = document.getElementById('minutos').value;
+            const datos = document.getElementById('datos').value;
+            const sms = document.getElementById('sms').value;
+            const descripcion = document.getElementById('descripcion').value;
+            
+            // Validar campos requeridos
+            if (!nombre || !precio || !minutos || !datos || !sms || !descripcion) {
+                alert('❌ Please complete all required fields');
+                return false;
+            }
+            
+            // Validar precio positivo
+            if (parseFloat(precio) <= 0) {
+                alert('❌ The price must be greater than 0');
+                return false;
+            }
+            
+            // Validar formato de minutos
+            if (isNaN(minutos) && minutos.toLowerCase() !== 'ilimitados') {
+                alert('❌ Minutes must be a number or "Unlimited""');
+                return false;
+            }
+            
+            // Mostrar loading
+            showLoading();
+            
+            return true;
+        }
+
+        // Mostrar loading
+        function showLoading() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Procesando...';
+        }
+
+        // Confirmar eliminación
+        function confirmDelete(planId, planName) {
+            if (confirm(`¿Estás seguro de eliminar el plan "${planName}"?\n\n⚠️ Esta acción no se puede deshacer y afectará a los clientes que tengan este plan.`)) {
+                window.location.href = "{{ url_for('admin_eliminar_plan', plan_id=0) }}".replace('0', planId);
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S para guardar
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                document.querySelector('form').submit();
+            }
+            
+            // Escape para cancelar
+            if (e.key === 'Escape') {
+                if (confirm('¿Cancelar cambios?')) {
+                    window.location.href = "{{ url_for('admin_planes') }}";
+                }
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📝 Formulario de plan cargado');
+            
+            // Enfocar primer campo
+            setTimeout(() => {
+                document.getElementById('nombre').focus();
+            }, 500);
+            
+            // Actualizar preview inicial
+            updatePreview();
+        });
+
+        // Auto-formato para números
+        document.getElementById('precio').addEventListener('input', function(e) {
+            let value = this.value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            this.value = value;
+            updatePreview();
+        });
+
+        // Sugerencias de precio basadas en nombre
+        document.getElementById('nombre').addEventListener('input', function(e) {
+            const nombre = this.value.toLowerCase();
+            const precio = document.getElementById('precio');
+            
+            if (nombre.includes('básico') && !precio.value) {
+                precio.value = '29.99';
+            } else if (nombre.includes('estándar') && !precio.value) {
+                precio.value = '49.99';
+            } else if (nombre.includes('premium') && !precio.value) {
+                precio.value = '79.99';
+            } else if (nombre.includes('familiar') && !precio.value) {
+                precio.value = '129.99';
+            }
+            
+            updatePreview();
+        });
+
+        // Validar que el precio no tenga más de 2 decimales
+        document.getElementById('precio').addEventListener('blur', function(e) {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+                updatePreview();
+            }
+        });
+
+        // Prevenir envío con Enter en campos específicos
+        document.querySelectorAll('input:not([type="number"])').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const inputs = Array.from(document.querySelectorAll('input, textarea, select'));
+                    const index = inputs.indexOf(this);
+                    if (index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                }
+            });
+        });
+
+        // Auto-guardado en localStorage (solo para nuevo plan)
+        {% if not plan %}
+        const formFields = ['nombre', 'precio', 'minutos', 'datos', 'sms', 'descripcion'];
+        
+        // Cargar datos guardados
+        formFields.forEach(field => {
+            const saved = localStorage.getItem(`plan_${field}`);
+            if (saved) {
+                document.getElementById(field).value = saved;
+            }
+        });
+        updatePreview();
+        
+        // Guardar mientras escribe
+        formFields.forEach(field => {
+            document.getElementById(field).addEventListener('input', function() {
+                localStorage.setItem(`plan_${field}`, this.value);
+            });
+        });
+        
+        // Limpiar al enviar
+        document.querySelector('form').addEventListener('submit', function() {
+            formFields.forEach(field => {
+                localStorage.removeItem(`plan_${field}`);
+            });
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
