@@ -1,0 +1,1161 @@
+<!-- templates/admin_usuarios.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - MEXTEL Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+        }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* ========== CONTAINER PRINCIPAL ========== */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* ========== PAGE HEADER ========== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* ========== SEARCH AND FILTERS ========== */
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .search-group label {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-stats {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #f0f2f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* ========== TABLE CONTAINER ========== */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        .users-table th {
+            text-align: left;
+            padding: 1rem;
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .users-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f2f5;
+            color: #2c3e50;
+            vertical-align: middle;
+        }
+
+        .users-table tbody tr {
+            transition: all 0.3s;
+        }
+
+        .users-table tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* ========== BADGES ========== */
+        .role-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .role-badge.admin {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .role-badge.cliente {
+            background: #3498db;
+            color: white;
+        }
+
+        .plan-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: #27ae60;
+            color: white;
+        }
+
+        .plan-badge.sin-plan {
+            background: #95a5a6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-active {
+            background: #27ae60;
+            box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 5px rgba(39, 174, 96, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(39, 174, 96, 0);
+            }
+        }
+
+        /* ========== ACTION BUTTONS ========== */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+        }
+
+        .action-btn.edit {
+            background: #f39c12;
+            color: white;
+        }
+
+        .action-btn.edit:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .action-btn.delete:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.view {
+            background: #3498db;
+            color: white;
+        }
+
+        .action-btn.view:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        /* ========== USER INFO ========== */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar-sm {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .user-email {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        /* ========== FLASH MESSAGES ========== */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ========== PAGINATION ========== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-item {
+            list-style: none;
+        }
+
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: white;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 2px solid #e0e0e0;
+        }
+
+        .page-link:hover, .page-link.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #95a5a6;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ========== MODAL ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            color: #2c3e50;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #95a5a6;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+            color: #7f8c8d;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* ========== LOADING ========== */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ========== TOOLTIP ========== */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 992px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .header-actions {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-section {
+                padding: 1rem;
+            }
+            
+            .table-container {
+                padding: 0.5rem;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar acción</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                ¿Estás seguro de que deseas eliminar este usuario?
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <a href="#" id="confirmAction" class="btn btn-danger">Eliminar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span style="font-size: 1.5rem;">📊</span>
+            <h1>MEXTEL Admin</h1>
+        </div>
+        
+        <div class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="{{ url_for('admin_usuarios') }}" class="active">
+                <span>👥</span> Users
+            </a>
+            <a href="{{ url_for('admin_planes') }}">
+                <span>📱</span> Plans
+            </a>
+            <a href="{{ url_for('admin_exportar') }}">
+                <span>📤</span> Export
+            </a>
+        </div>
+        
+        <div class="user-menu">
+            <span>👋 Hello, {{ session['username'] }}</span>
+            <div class="user-avatar" onclick="window.location.href='{{ url_for('logout') }}'" title="Cerrar sesión">
+                🚪
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        <span>
+                            {% if category == 'success' %}✅
+                            {% elif category == 'error' %}❌
+                            {% else %}ℹ️{% endif %}
+                        </span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>
+                <span>👥</span> 
+                Users
+            </h2>
+            <div class="header-actions">
+                <a href="{{ url_for('admin_nuevo_usuario') }}" class="btn btn-primary">
+                    <span>➕</span> New User
+                </a>
+                <button class="btn btn-secondary" onclick="exportUsers()">
+                    <span>📥</span> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="search-section">
+            <div class="search-grid">
+                <div class="search-group">
+                    <label>🔍 Search Users</label>
+                    <input type="text" 
+                           class="search-input" 
+                           id="searchInput" 
+                           placeholder="Name, username or email..."
+                           onkeyup="filterUsers()">
+                </div>
+                
+                <div class="search-group">
+                    <label>🎯 Filter by role</label>
+                    <select class="filter-select" id="roleFilter" onchange="filterUsers()">
+                        <option value="todos">All roles</option>
+                        <option value="admin">Adminis</option>
+                        <option value="cliente">Customers</option>
+                    </select>
+                </div>
+                
+                <div class="search-group">
+                    <label>📱 Filter by plan</label>
+                    <select class="filter-select" id="planFilter" onchange="filterUsers()">
+                        <option value="todos">All plans</option>
+                        {% for plan in planes %}
+                        <option value="{{ plan.nombre }}">{{ plan.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="search-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        <span>🗑️</span> Clean
+                    </button>
+                </div>
+            </div>
+            
+            <div class="search-stats">
+                <span id="resultsCount">Show {{ usuarios|length }} users</span>
+                <span>🔄 Last update: {{ datetime.now().strftime('%H:%M:%S') }}</span>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            {% if usuarios %}
+            <table class="users-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Users</th>
+                        <th>Information</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Plan</th>
+                        <th>State</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr class="user-row" 
+                        data-username="{{ usuario.username|lower }}"
+                        data-nombre="{{ usuario.nombre|lower }}"
+                        data-email="{{ usuario.email|lower }}"
+                        data-rol="{{ usuario.rol }}"
+                        data-plan="{{ usuario.plan if usuario.plan != 'N/A' and usuario.plan != '-' else 'sin plan' }}">
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar-sm">
+                                    {{ usuario.nombre[:2]|upper if usuario.nombre else usuario.username[:2]|upper }}
+                                </div>
+                                <div class="user-details">
+                                    <span class="user-name">{{ usuario.username }}</span>
+                                    <span class="user-email">ID: #{{ loop.index }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;">{{ usuario.nombre }}</div>
+                            <div style="font-size: 0.8rem; color: #95a5a6;">{{ usuario.email }}</div>
+                        </td>
+                        <td>{{ usuario.email }}</td>
+                        <td>
+                            {% if usuario.rol == 'admin' %}
+                                <span class="role-badge admin">Administrador</span>
+                            {% else %}
+                                <span class="role-badge cliente">Cliente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if usuario.rol == 'cliente' %}
+                                {% if usuario.plan and usuario.plan != 'N/A' and usuario.plan != '-' %}
+                                    <span class="plan-badge">{{ usuario.plan }}</span>
+                                {% else %}
+                                    <span class="plan-badge sin-plan">Sin plan</span>
+                                {% endif %}
+                            {% else %}
+                                <span style="color: #95a5a6;">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-active"></span>
+                            Active
+                        </td>
+                        <td>
+                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <h3>No hay usuarios registrados</h3>
+                <p>Comienza creando un nuevo usuario</p>
+                <a href="{{ url_for('admin_nuevo_usuario') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                    <span>➕</span> Crear Usuario
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if usuarios and usuarios|length > 10 %}
+        <ul class="pagination">
+            <li class="page-item"><a href="#" class="page-link">«</a></li>
+            <li class="page-item"><a href="#" class="page-link active">1</a></li>
+            <li class="page-item"><a href="#" class="page-link">2</a></li>
+            <li class="page-item"><a href="#" class="page-link">3</a></li>
+            <li class="page-item"><a href="#" class="page-link">»</a></li>
+        </ul>
+        {% endif %}
+
+        <!-- Stats Footer -->
+        <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 10px; font-size: 0.9rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 2rem;">
+                    <span>👥 Total users: <strong>{{ usuarios|length }}</strong></span>
+                    <span>👑 Adminis: <strong>{{ usuarios|selectattr('rol', 'equalto', 'admin')|list|length }}</strong></span>
+                    <span>📱 Customers: <strong>{{ usuarios|selectattr('rol', 'equalto', 'cliente')|list|length }}</strong></span>
+                </div>
+                <div style="color: #95a5a6;">
+                    <span>🕒 Update: {{ datetime.now().strftime('%H:%M:%S') }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Variables globales
+        let deleteUrl = '';
+
+        // Función para filtrar usuarios
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const planFilter = document.getElementById('planFilter').value;
+            
+            const rows = document.querySelectorAll('.user-row');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const username = row.dataset.username;
+                const nombre = row.dataset.nombre;
+                const email = row.dataset.email;
+                const rol = row.dataset.rol;
+                const plan = row.dataset.plan;
+                
+                const matchesSearch = username.includes(searchTerm) || 
+                                     nombre.includes(searchTerm) || 
+                                     email.includes(searchTerm);
+                
+                const matchesRole = roleFilter === 'todos' || rol === roleFilter;
+                const matchesPlan = planFilter === 'todos' || plan === planFilter.toLowerCase();
+                
+                if (matchesSearch && matchesRole && matchesPlan) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('resultsCount').textContent = 
+                `Mostrando ${visibleCount} de ${rows.length} usuarios`;
+        }
+
+        // Limpiar filtros
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = 'todos';
+            document.getElementById('planFilter').value = 'todos';
+            filterUsers();
+        }
+
+        // Confirmar eliminación
+        function confirmDelete(username) {
+            deleteUrl = "{{ url_for('admin_eliminar_usuario', username='') }}" + username;
+            document.getElementById('modalMessage').innerHTML = 
+                `¿Estás seguro de que deseas eliminar al usuario <strong>${username}</strong>?<br><br>
+                <span style="color: #e74c3c; font-size: 0.9rem;">⚠️ Esta acción no se puede deshacer.</span>`;
+            document.getElementById('confirmAction').href = deleteUrl;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        // Ver usuario (función para expandir)
+        function viewUser(username) {
+            alert(`Ver detalles del usuario: ${username}\n\nFuncionalidad en desarrollo...`);
+        }
+
+        // Exportar usuarios
+        function exportUsers() {
+            showLoading();
+            
+            // Simular exportación
+            setTimeout(() => {
+                hideLoading();
+                
+                // Crear CSV
+                const users = [];
+                document.querySelectorAll('.user-row').forEach(row => {
+                    users.push({
+                        username: row.dataset.username,
+                        nombre: row.querySelector('.user-name').textContent,
+                        email: row.dataset.email,
+                        rol: row.dataset.rol,
+                        plan: row.dataset.plan
+                    });
+                });
+                
+                // Mostrar opciones de exportación
+                const format = confirm('¿Exportar a CSV? (OK para CSV, Cancelar para JSON)');
+                
+                if (format) {
+                    exportToCSV(users);
+                } else {
+                    exportToJSON(users);
+                }
+            }, 1500);
+        }
+
+        // Exportar a CSV
+        function exportToCSV(users) {
+            let csv = 'Usuario,Nombre,Email,Rol,Plan\n';
+            users.forEach(u => {
+                csv += `${u.username},${u.nombre},${u.email},${u.rol},${u.plan}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `usuarios_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        // Exportar a JSON
+        function exportToJSON(users) {
+            const blob = new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `usuarios_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        }
+
+        // Mostrar loading
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        // Ocultar loading
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Ordenar tabla
+        function sortTable(column) {
+            const table = document.getElementById('usersTable');
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.rows);
+            
+            rows.sort((a, b) => {
+                const aVal = a.cells[column].textContent;
+                const bVal = b.cells[column].textContent;
+                return aVal.localeCompare(bVal);
+            });
+            
+            tbody.append(...rows);
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+F para buscar
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+            
+            // Escape para cerrar modal
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+            
+            // Ctrl+N para nuevo usuario
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                window.location.href = "{{ url_for('admin_nuevo_usuario') }}";
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📋 Página de usuarios cargada');
+            
+            // Animar filas
+            document.querySelectorAll('.user-row').forEach((row, index) => {
+                row.style.animation = `fadeInUp 0.3s ease ${index * 0.05}s both`;
+            });
+            
+            // Enfocar búsqueda
+            setTimeout(() => {
+                document.getElementById('searchInput').focus();
+            }, 500);
+        });
+
+        // Animación fadeInUp
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('confirmModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
+    
+</body>
+</html>
